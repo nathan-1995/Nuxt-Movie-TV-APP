@@ -42,10 +42,13 @@
         <MovieCard 
           v-for="movie in trendingMovies" 
           :key="movie.id"
+          :id="movie.id"
           :title="movie.title"
           :poster-path="movie.poster_path"
           :overview="movie.overview"
           :rating="movie.vote_average"
+          type="movie"
+          @open-details="openMovieDetails"
         />
       </div>
     </section>
@@ -66,10 +69,13 @@
         <MovieCard 
           v-for="show in trendingTVShows" 
           :key="show.id"
+          :id="show.id"
           :title="show.name"
           :poster-path="show.poster_path"
           :overview="show.overview"
           :rating="show.vote_average"
+          type="tv"
+          @open-details="openMovieDetails"
         />
       </div>
     </section>
@@ -82,6 +88,16 @@
         Sign Up
       </NuxtLink>
     </div>
+
+    <!-- Movie Details Modal -->
+    <MovieModal
+      :is-open="isModalOpen"
+      :movie-id="selectedMovieId"
+      :type="selectedMovieType"
+      @close="closeModal"
+      @add-to-favorites="handleAddToFavorites"
+      @add-to-watchlist="handleAddToWatchlist"
+    />
   </div>
 </template>
 
@@ -103,6 +119,69 @@ const movieError = ref(null)
 const trendingTVShows = ref([])
 const loadingTVShows = ref(false)
 const tvShowError = ref(null)
+
+// Modal state
+const isModalOpen = ref(false)
+const selectedMovieId = ref(null)
+const selectedMovieType = ref('movie')
+
+// Modal handlers
+const openMovieDetails = ({ id, type }) => {
+  selectedMovieId.value = id
+  selectedMovieType.value = type
+  isModalOpen.value = true
+}
+
+const closeModal = () => {
+  isModalOpen.value = false
+}
+
+// Favorites and watchlist handlers
+const handleAddToFavorites = async (item) => {
+  try {
+    // Import dynamically to avoid initialization errors
+    const { useUserLists } = await import('~/composables/useUserLists')
+    const { addToFavorites } = useUserLists()
+    
+    const { data, error } = await addToFavorites(item)
+    
+    if (error) {
+      alert(`Error adding to favorites: ${error.message || error}`)
+    } else if (data && data.alreadyExists) {
+      // This item is already in favorites
+      alert('This item is already in your favorites!')
+    } else {
+      alert('Added to favorites successfully!')
+      closeModal()
+    }
+  } catch (err) {
+    console.error('Error with favorites:', err)
+    alert('Could not add to favorites. Please try again later.')
+  }
+}
+
+const handleAddToWatchlist = async (item) => {
+  try {
+    // Import dynamically to avoid initialization errors
+    const { useUserLists } = await import('~/composables/useUserLists')
+    const { addToWatchlist } = useUserLists()
+    
+    const { data, error } = await addToWatchlist(item)
+    
+    if (error) {
+      alert(`Error adding to watchlist: ${error.message || error}`)
+    } else if (data && data.alreadyExists) {
+      // This item is already in watchlist
+      alert('This item is already in your watchlist!')
+    } else {
+      alert('Added to watchlist successfully!')
+      closeModal()
+    }
+  } catch (err) {
+    console.error('Error with watchlist:', err)
+    alert('Could not add to watchlist. Please try again later.')
+  }
+}
 
 // Fetch data on component mount
 onMounted(async () => {
