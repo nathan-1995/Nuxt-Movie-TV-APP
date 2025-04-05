@@ -13,15 +13,52 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch, onBeforeUnmount } from 'vue'
 import { useAuth } from '~/composables/useAuth'
+import { useRoute, useRouter } from 'vue-router'
 
 const initialized = ref(false)
-const { initAuth } = useAuth()
+const { user, initAuth } = useAuth()
+const route = useRoute()
+const router = useRouter()
 
-// Middleware to prevent logged-in users from accessing the app
+// Initialize auth and handle redirects
 onMounted(async () => {
   await initAuth()
   initialized.value = true
+
+  // After initialization, check authentication state and current route
+  handleAuthRedirect()
+
+  // Add event listener for popstate (browser back/forward)
+  window.addEventListener('popstate', handleAuthRedirect)
 })
+
+// Remove event listener when component is unmounted
+onBeforeUnmount(() => {
+  window.removeEventListener('popstate', handleAuthRedirect)
+})
+
+// Watch for changes in authentication state AND route changes
+watch([() => user.value, () => route.path], () => {
+  if (initialized.value) {
+    handleAuthRedirect()
+  }
+})
+
+// Function to handle authentication-based redirects
+function handleAuthRedirect() {
+  const publicRoutes = ['/login', '/signup']
+  const currentPath = route.path
+
+  // If user is not authenticated and not on a public route, redirect to login
+  if (!user.value && !publicRoutes.includes(currentPath)) {
+    router.replace('/login')
+  }
+
+  // If user is authenticated and on a public route, redirect to home
+  if (user.value && publicRoutes.includes(currentPath)) {
+    router.replace('/')
+  }
+}
 </script>

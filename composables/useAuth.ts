@@ -123,7 +123,8 @@ export function useAuth() {
       if (error) throw error
       
       user.value = null
-      // After signout, redirect happens in the component
+      //after log out, redirect to home page
+      window.location.href = '/'
     } catch (error) {
       console.error('Error signing out:', error)
       authError.value = error as AuthError

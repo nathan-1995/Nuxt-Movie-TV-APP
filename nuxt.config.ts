@@ -11,6 +11,8 @@ export default defineNuxtConfig({
     public: {
       supabaseUrl: process.env.SUPABASE_URL,
       supabaseKey: process.env.SUPABASE_KEY,
+      tmdbApiKey: process.env.TMDB_API_KEY,
+      tmdbBaseUrl: process.env.TMDB_BASE_URL,
     }
   },
 
