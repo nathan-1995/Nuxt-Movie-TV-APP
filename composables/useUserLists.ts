@@ -184,6 +184,64 @@ export function useUserLists() {
       loading.value = false
     }
   }
+
+  // Remove from favorites
+  const removeFromFavorites = async (id: string) => {
+    if (!user.value) {
+      return { error: new Error('User not authenticated') }
+    }
+    
+    loading.value = true
+    error.value = null
+    
+    try {
+      const { error: deleteError } = await supabase
+        .from('favorites')
+        .delete()
+        .eq('id', id)
+        .eq('user_id', user.value.id)
+      
+      if (deleteError) {
+        throw deleteError
+      }
+      
+      return { error: null }
+    } catch (err) {
+      error.value = err instanceof Error ? err : new Error(String(err))
+      return { error: err }
+    } finally {
+      loading.value = false
+    }
+  }
+
+// Remove from watchlist
+  const removeFromWatchlist = async (id: string) => {
+    if (!user.value) {
+      return { error: new Error('User not authenticated') }
+    }
+    
+    loading.value = true
+    error.value = null
+    
+    try {
+      const { error: deleteError } = await supabase
+        .from('watchlist')
+        .delete()
+        .eq('id', id)
+        .eq('user_id', user.value.id)
+      
+      if (deleteError) {
+        throw deleteError
+      }
+      
+      return { error: null }
+    } catch (err) {
+      error.value = err instanceof Error ? err : new Error(String(err))
+      return { error: err }
+    } finally {
+      loading.value = false
+    }
+}
   
   // Return the functions and state variables
   return {
@@ -192,6 +250,8 @@ export function useUserLists() {
     addToFavorites,
     addToWatchlist,
     getFavorites,
-    getWatchlist
+    getWatchlist,
+    removeFromFavorites,
+    removeFromWatchlist
   }
 }

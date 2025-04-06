@@ -9,8 +9,7 @@
       
       <div class="flex items-center gap-6">
         <template v-if="user">
-          <NuxtLink to="/favorites" class="text-white no-underline hover:underline">Favorites</NuxtLink>
-          <NuxtLink to="/watchlist" class="text-white no-underline hover:underline">Watchlist</NuxtLink>
+          <NuxtLink to="/my-lists" class="text-white no-underline hover:underline">Your Lists</NuxtLink>
           <button @click="handleLogout" 
                   class="border border-white text-white py-2 px-4 rounded hover:bg-white/10 transition">
             {{ loading ? 'Logging out...' : 'Log Out' }}
